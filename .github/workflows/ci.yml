@@ -10,7 +10,7 @@ jobs:
         uses: actions/checkout@v1
 
       - name: Run Tests
-        uses: docker://python:3.7.4-buster
+        uses: docker://python:3.7.4-alpine
         with:
           entrypoint: /bin/sh
           args: -c "python -m unittest discover -v"
