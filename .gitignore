@@ -1,0 +1,8 @@
+*
+
+!*/
+!readme.md
+!.gitignore
+!cp_parse/*.py
+!tests/*.py
+!.github/workflows/*.yml
