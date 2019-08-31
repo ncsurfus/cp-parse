@@ -22,13 +22,20 @@ class TestToken(unittest.TestCase):
                 self.assertEqual(data[token.offset:], expect_remainder)
 
     def test_read_token_name(self):
+        # The token ends with a space
         data = "test_name (test_data)"
         token = cp_parse.read_token_name(data)
         self.assertEqual(token.type, cp_parse.TokenType.OBJECT_NAME)
         self.assertEqual(token.value, "test_name")
         self.assertEqual(data[token.offset:], "(test_data)")
 
+        # If there is no space, then we should require more data.
+        data = "test_name"
+        token = cp_parse.read_token_name(data)
+        self.assertEqual(token.type, cp_parse.TokenType.NEED_MORE_DATA)
+
     def test_read_token_var(self):
+        # The token ends with any of the below delimiters
         for delimiter in [")", "\r", "\n", "\t"]:
             with self.subTest(delimiter=delimiter):
                 data = f"test_data{delimiter} :test"
@@ -37,12 +44,23 @@ class TestToken(unittest.TestCase):
                 self.assertEqual(token.value, "test_data")
                 self.assertEqual(data[token.offset:], f"{delimiter} :test")
 
+        # If there is no delimiter, then we require more data.
+        data = "test_data"
+        token = cp_parse.read_token_var(data)
+        self.assertEqual(token.type, cp_parse.TokenType.NEED_MORE_DATA)
+
     def test_read_token_quoted_var(self):
+        #The token ends with a "
         data = 'test_data" :test'
         token = cp_parse.read_token_quoted_var(data)
         self.assertEqual(token.type, cp_parse.TokenType.OBJECT_OPEN)
         self.assertEqual(token.value, "test_data")
         self.assertEqual(data[token.offset:], ' :test')
+
+        # If there is no ", then we require more data.
+        data = "test_data"
+        token = cp_parse.read_token_var(data)
+        self.assertEqual(token.type, cp_parse.TokenType.NEED_MORE_DATA)
 
     def test_read_tokens(self):
         data = """
